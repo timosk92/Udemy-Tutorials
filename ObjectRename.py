@@ -2,6 +2,17 @@
 Udemy Tutorial: Artist friendly Programming
 '''
 from maya import cmds
+
+SUFFIXES = {
+"mesh":"geo",
+"joint":"jnt",
+"camera":None
+}
+
+DEFAULT_SUFFIX= "grp"
+
+
+
 def rename():
     selection = cmds.ls(sl=True)
 
@@ -25,18 +36,14 @@ def rename():
         else:
             objType = cmds.objectType(obj)
 
-        'print object type, if it has child print that'
-        print (objType)
+        suffix = SUFFIXES.get(objType,DEFAULT_SUFFIX)
+        "get the object type from the suffix dict, if you cant get default"
 
-        if objType =='mesh':
-            suffix = "geo"
-        elif objType == 'joint':
-            suffix = "jnt"
-        elif objType == 'camera':
-            print 'skipping camera'
+        if not suffix:
             continue
-        else:
-            suffix = "grp"
+
+        if obj.endswith(suffix):
+            continue
 
 
         newName = shortName + "_" + suffix
