@@ -32,4 +32,4 @@ def changeTeeth(constructor,extrude, teeth=10, length=0.3):
         faceNames = "f[%s]" % (face)
         faceName.append(facesNames)
 
-    cmds.setAttr('%s.inputComponent' % (extrude)), len(faceNames)
+    cmds.setAttr('%s.inputComponent' % (extrude)), len(faceNames))
