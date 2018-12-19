@@ -8,8 +8,10 @@ import random
 from functools import partial
 import math
 
+
 def main():
     createUI()
+
 
 class createUI(object):
 
@@ -28,6 +30,7 @@ class createUI(object):
     def buildUI(self):
         cmds.columnLayout( columnAttach=('both', 5), rowSpacing=10, columnWidth=250)
         cmds.button(label = "Generate", command = partial(cityBuild))
+
 
 class city(object):
     def __init__(self,sizeX,sizeY,startX=0,startY=0,highway=True,density = 3,square=2):
@@ -76,6 +79,7 @@ class city(object):
             freeway(45).create(self.sizeX+self.startX+1,self.startY+1)
             freeway(45).create(self.startX,self.startY+1)
 
+
 def cityBuild(*args):
     #make plane, change shape here
     citySize = 100
@@ -88,9 +92,9 @@ def cityBuild(*args):
     cmds.group( em = True, n = "gen_Highways")
     cmds.group( em = True, n = "gen_Water")
 
-    city(20,20,42,41,True, 2, 2).create()
-    city(20,20,72,41,True, 1, 3).create()
-    city(20,20,50,20,True,10,2).create()
+    city(20, 20, 42, 41, True, 2, 2).create()
+    city(20, 20, 72, 41, True, 1, 3).create()
+    city(20, 20, 50, 20, True, 4, 2).create()
     #for x in range(3):
     #    city(10,10,10 * x,0,True,8).create()
     #for x in range(3):
@@ -102,11 +106,14 @@ def cityBuild(*args):
         cmds.select('ground.f['+str((y*9) + 3)+']' , r=True)
         cmds.delete()
     tiles = []
-    for x in range(1,water.waterCount):
+    for x in range(1,water.waterCount+1):
         tiles.append("Water"+str(x))
     cmds.polyUnite(*tiles, n='result')
     cmds.delete("result", constructionHistory=True)
-    bridge().create(0,0,0)
+    bridge(0).create(35, 4, 1.4)
+    park().create()
+    park().movePark(71, 20)
+
 
 class water(object):
     waterCount = 0
@@ -129,6 +136,7 @@ class water(object):
 
 class freeway(object):
     freewayCount = 0
+
     def __init__(self,rotation):
 
         self.rotate = rotation
@@ -153,8 +161,9 @@ class freeway(object):
         cmds.setAttr(("Freeway_" + str(self.freewayCount)+".translateX"),placeX-0.5)
         cmds.parent( self.mesh, 'gen_Highways' )
 
+
 class Building(object):
-    mesh=None
+    mesh = None
     buildingCount = 0
 
     def __init__(self,density):
@@ -185,13 +194,47 @@ class Building(object):
     def addExtras(self):
         pass
 
+
 class park(object):
-    pass
+    mesh = None
+
+    def __init__(self):
+        pass
+
+    def create(self):
+        self.mesh = cmds.polyCube(d=5, w=5, h=1, n="Park")
+
+    def movePark(self, placeX=0, placeY=0):
+        cmds.select(self.mesh)
+        cmds.move(placeX, 0, placeY)
+        cmds.select(cl=True)
 
 class bridge(object):
     mesh=None
-    def __init__(self,rotation=0):
+    def __init__(self, rotation=0):
         self.rotation = rotation
-    def create(self,moveX=0,moveY=0,moveZ=0):
-        self.mesh = cmds.polyCube(1,10,1)
-        #cmds.setAttr(self+."ry",self.rotate)
+
+    def create(self,placeX=0, placeY=0, placeZ=0):
+        cmds.polyCube(d=3, w=10, h=0.2, n="Bridge", sx=7, sy=3, sz=3)
+        #top posts
+        cmds.polyExtrudeFacet("Bridge.f[22]")
+        cmds.polyExtrudeFacet("Bridge.f[26]")
+        cmds.polyExtrudeFacet("Bridge.f[40]")
+        cmds.polyExtrudeFacet("Bridge.f[36]")
+        cmds.polyMoveVertex("Bridge.vtx[104:119]", ty=3.5)
+        #Bottom posts
+        cmds.polyExtrudeFacet("Bridge.f[64]")
+        cmds.polyExtrudeFacet("Bridge.f[68]")
+        cmds.polyExtrudeFacet("Bridge.f[78]")
+        cmds.polyExtrudeFacet("Bridge.f[82]")
+        cmds.polyMoveVertex("Bridge.vtx[120:135]", ty=-2)
+        #ramps
+        cmds.polyExtrudeFacet("Bridge.f[93:101]")
+        cmds.polyMoveVertex("Bridge.vtx[132:147]", ty=-2, tx=-7)
+        cmds.polyExtrudeFacet("Bridge.f[84:92]")
+        cmds.polyMoveVertex("Bridge.vtx[145:159]", ty=-2, tx=7)
+
+        cmds.setAttr("Bridge.translateZ",placeY)
+        cmds.setAttr("Bridge.translateX",placeX)
+        cmds.setAttr("Bridge.translateY",placeZ)
+        cmds.setAttr("Bridge.ry", self.rotation)
